@@ -10,6 +10,7 @@ Source0:	%{name}-%{version}.tar.gz
 Requires:	systemd
 Requires:	dnf-automatic
 Requires:	/etc/fstab
+BuildRequires:	glib2
 
 %description
 OTA for ARTIK
@@ -27,6 +28,9 @@ mkdir -p %{buildroot}/usr/lib/systemd/system
 cp units/dnf-automatic.path %{buildroot}/usr/lib/systemd/system
 cp units/dnf-automatic-undo.service %{buildroot}/usr/lib/systemd/system
 
+mkdir -p %{buildroot}/usr/bin/
+cp artik-updater %{buildroot}/usr/bin/
+
 %post
 /usr/bin/systemctl enable dnf-automatic.path
 /usr/bin/systemctl disable dnf-automatic.timer
@@ -40,3 +44,7 @@ echo "/dev/mmcblk0p7  /   ext4    errors=remount-ro,noatime,nodiratime    0   1"
 %attr(0644,root,root) /etc/systemd/system/dnf-automatic.service
 %attr(0644,root,root) /usr/lib/systemd/system/dnf-automatic.path
 %attr(0644,root,root) /usr/lib/systemd/system/dnf-automatic-undo.service
+%attr(0755,root,root) /usr/bin/artik-updater
+
+%build
+make %{?_smp_mflags}
