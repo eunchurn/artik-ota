@@ -1,0 +1,11 @@
+[Unit]
+Description=Triggering dnf automatic update
+DefaultDependencies=no
+Before=paths.target
+
+[Path]
+PathExists=/etc/.dnf-automatic
+Unit=dnf-automatic.service
+
+[Install]
+WantedBy=multi-user.target

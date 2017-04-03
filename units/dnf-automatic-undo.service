@@ -1,0 +1,10 @@
+[Unit]
+Description=dnf automatic undo
+ConditionPathExists=/etc/.dnf-automatic-undo
+
+[Service]
+ExecStart=/usr/bin/dnf history undo last -y
+ExecStartPost=/bin/rm /etc/.dnf-automatic-undo
+
+[Install]
+WantedBy=multi-user.target
