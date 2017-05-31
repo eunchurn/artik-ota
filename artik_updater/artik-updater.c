@@ -27,7 +27,7 @@
 #define CMDLINE			"/proc/cmdline"
 #define PART_SIZE		(32 * 1024 * 1024)
 #define PATH_LEN		32
-#define VERSION			"v0.3"
+#define VERSION			"v1.0.2"
 #define HEADER_MAGIC		"ARTIK_OTA"
 
 enum boot_dev {
