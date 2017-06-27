@@ -3,7 +3,7 @@ Summary:	OTA for ARTIK
 Version:	1.0.2
 Release:	1
 Group:		System
-License:	none
+License:	Apache-2.0
 
 Source0:	%{name}-%{version}.tar.gz
 
