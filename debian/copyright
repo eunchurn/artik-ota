@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: artik-ota
+Upstream-Contact: Jaewon Kim <jaewon02.kim@samsung.com>
+Comment: OTA function for ARTIK device
+
+Files: *
+Copyright:
+	2017 Samsung Electronics Co., Ltd.
+License:
+	Apache-2.0
+
+Files: artik_updater/*
+Copyright:
+	Jaewon Kim <jaewon02.kim@samsung.com>
+Comment:
+	Utility for Kernel / Modules partition.

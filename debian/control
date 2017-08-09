@@ -1,0 +1,10 @@
+Source: artik-ota
+Section: Miscellaneous
+Priority: standard
+Maintainer: Jaewon Kim <jaewon02.kim@samsung.com>
+Uploaders: Jaewon Kim <jaewon02.kim@samsung.com>
+Build-Depends: debhelper (>= 9)
+
+Package: artik-ota
+Architecture: any-arm arm64
+Description: OTA for ARTIK
