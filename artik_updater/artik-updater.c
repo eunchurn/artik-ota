@@ -72,7 +72,7 @@ enum boot_part check_booting_part(void)
 		return -ENODEV;
 	}
 
-	while (fscanf(fp, "%s", cmdline) != EOF) {
+	while (fscanf(fp, "%255s", cmdline) != EOF) {
 		if (strncmp(cmdline, "bootfrom=2", 10) == 0) {
 			bootpart = PART0;
 			break;
@@ -100,7 +100,7 @@ enum boot_dev check_booting_dev(void)
 		return -ENODEV;
 	}
 
-	while (fscanf(fp, "%s", cmdline) != EOF) {
+	while (fscanf(fp, "%255s", cmdline) != EOF) {
 		if (strncmp(cmdline, "root=/dev/mmcblk0", 17) == 0) {
 			bootdev = EMMC;
 			break;
@@ -252,7 +252,7 @@ int check_booting_rescue(void)
 		return -ENODEV;
 	}
 
-	while (fscanf(fp, "%s", cmdline) != EOF) {
+	while (fscanf(fp, "%255s", cmdline) != EOF) {
 		if (strncmp(cmdline, "rescue=0", 8) == 0)
 			rescue = 0;
 		else if (strncmp(cmdline, "rescue=1", 8) == 0)
