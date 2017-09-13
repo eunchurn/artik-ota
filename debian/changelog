@@ -1,3 +1,9 @@
+artik-ota (1.0.3) unstable; urgency=medium
+
+  * artik-updater: prevent fscanf overflow
+
+ -- Chanho Park <chanho61.park@samsung.com>  Wed, 13 Sep 2017 13:24:46 +0900
+
 artik-ota (1.0.2) unstable; urgency=medium
 
   * Initial release.
