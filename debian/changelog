@@ -1,3 +1,10 @@
+artik-ota (1.0.4) UNRELEASED; urgency=medium
+
+  * artik_updater: fix invalid return value
+  * artik_updater: return -EINVAL if the part_num is wrong
+
+ -- Chanho Park <chanho61.park@samsung.com>  Mon, 15 Jan 2018 18:52:32 +0900
+
 artik-ota (1.0.3) unstable; urgency=medium
 
   * artik-updater: prevent fscanf overflow
