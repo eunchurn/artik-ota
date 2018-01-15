@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
 		case 'i':
 			fd = read_boot_info(&current_boot);
 			if (fd < 0)
-				return ret;
+				return fd;
 			show_boot_info(&current_boot);
 			fsync(fd);
 			close(fd);
