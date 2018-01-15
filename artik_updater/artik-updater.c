@@ -224,6 +224,8 @@ int update_boot_info(int fd, struct boot_info *boot, const char *tag)
 		part = &boot->part0;
 	else if (boot->part_num == PART1)
 		part = &boot->part1;
+	else
+		return -EINVAL;
 
 	part->state = BOOT_UPDATED;
 	part->retry = 1;
