@@ -255,12 +255,15 @@ int check_booting_rescue(void)
 	}
 
 	while (fscanf(fp, "%255s", cmdline) != EOF) {
-		if (strncmp(cmdline, "rescue=0", 8) == 0)
+		if (strncmp(cmdline, "rescue=0", 8) == 0) {
 			rescue = 0;
-		else if (strncmp(cmdline, "rescue=1", 8) == 0)
+			break;
+		} else if (strncmp(cmdline, "rescue=1", 8) == 0) {
 			rescue = 1;
-		else
+			break;
+		} else {
 			rescue = -EINVAL;
+		}
 	}
 	fclose(fp);
 
