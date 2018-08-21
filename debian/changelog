@@ -1,3 +1,9 @@
+artik-ota (1.0.6) UNRELEASED; urgency=medium
+
+ * artik-updater: support artik310s model
+
+ -- Jaewon Kim <jaewon02.kim@samsung.com>  Tue Aug 21 16:03:15 2018 +0900
+
 artik-ota (1.0.5) UNRELEASED; urgency=medium
 
  * artik-updater: fix rescue check error

@@ -14,56 +14,26 @@
 #include <linux/types.h>
 #include <linux/errno.h>
 #include <fcntl.h>
+#include "artik-updater.h"
 
-#define EMMC_DEV		"/dev/mmcblk0p"
-#define SDCARD_DEV		"/dev/mmcblk1p"
+#define VERSION		"v1.0.6"
 
-#define FLAG_PART		"1"
-#define BOOT0_PART		"2"
-#define BOOT1_PART		"3"
-#define MODULES0_PART		"5"
-#define MODULES1_PART		"6"
-
-#define CMDLINE			"/proc/cmdline"
-#define PART_SIZE		(32 * 1024 * 1024)
-#define PATH_LEN		32
-#define VERSION			"v1.0.5"
-#define HEADER_MAGIC		"ARTIK_OTA"
-
-enum boot_dev {
-	EMMC	= 0,
-	SDCARD,
-};
-
-enum boot_part {
-	PART0	= 0,
-	PART1,
-};
-
-enum boot_state {
-	BOOT_FAILED	= 0,
-	BOOT_SUCCESS,
-	BOOT_UPDATED,
-};
-
-struct part_info {
-	enum boot_state state;
-	char retry;
-	char tag[32];
-};
-
-struct boot_info {
-	char header_magic[32];
-	enum boot_part part_num;
-	enum boot_state state;
-	struct part_info part0;
-	struct part_info part1;
+static const struct target_info targets[] = {
+	{ .name = "artik710", .boot0_p = "2", .boot1_p = "3", .modules0_p = "5",
+		.modules1_p = "6", .boot_s = 32, .modules_s = 32},
+	{ .name = "artik530", .boot0_p = "2", .boot1_p = "3", .modules0_p = "5",
+		.modules1_p = "6", .boot_s = 32, .modules_s = 32},
+	{ .name = "artik305", .boot0_p = "2", .boot1_p = "3", .modules0_p = "5",
+		.modules1_p = "6", .boot_s = 16, .modules_s = 20},
+	{ .name = "artik310", .boot0_p = "2", .boot1_p = "3", .modules0_p = "4",
+		.modules1_p = "5", .boot_s = 16, .modules_s = 20},
+	{},
 };
 
 enum boot_part check_booting_part(void)
 {
 	FILE *fp;
-	char cmdline[256] = {0, };
+	char cmdline[CMD_LEN] = {0, };
 	enum boot_part bootpart;
 
 	fp = fopen(CMDLINE, "r");
@@ -73,10 +43,16 @@ enum boot_part check_booting_part(void)
 	}
 
 	while (fscanf(fp, "%255s", cmdline) != EOF) {
-		if (strncmp(cmdline, "bootfrom=2", 10) == 0) {
+		if ((strncmp(cmdline, "bootfrom=2", 10) == 0) ||
+				(strncmp(cmdline, "bootpart=/dev/mmcblk0p2", 23) == 0) ||
+				(strncmp(cmdline, "bootpart=/dev/mmcblk1p2", 23) == 0) ||
+				(strncmp(cmdline, "bootpart=/dev/mmcblk2p2", 23) == 0)) {
 			bootpart = PART0;
 			break;
-		} else if (strncmp(cmdline, "bootfrom=3", 10) == 0) {
+		} else if ((strncmp(cmdline, "bootfrom=3", 10) == 0) ||
+				(strncmp(cmdline, "bootpart=/dev/mmcblk0p3", 23) == 0) ||
+				(strncmp(cmdline, "bootpart=/dev/mmcblk1p3", 23) == 0) ||
+				(strncmp(cmdline, "bootpart=/dev/mmcblk2p3", 23) == 0)) {
 			bootpart = PART1;
 			break;
 		} else {
@@ -91,7 +67,7 @@ enum boot_part check_booting_part(void)
 enum boot_dev check_booting_dev(void)
 {
 	FILE *fp;
-	char cmdline[256] = {0, };
+	char cmdline[CMD_LEN] = {0, };
 	enum boot_dev bootdev;
 
 	fp = fopen(CMDLINE, "r");
@@ -104,7 +80,8 @@ enum boot_dev check_booting_dev(void)
 		if (strncmp(cmdline, "root=/dev/mmcblk0", 17) == 0) {
 			bootdev = EMMC;
 			break;
-		} else if (strncmp(cmdline, "root=/dev/mmcblk1", 17) == 0) {
+		} else if ((strncmp(cmdline, "root=/dev/mmcblk1", 17) == 0) ||
+				(strncmp(cmdline, "root=/dev/mmcblk2", 17) == 0)) {
 			bootdev = SDCARD;
 			break;
 		} else {
@@ -245,7 +222,7 @@ int update_boot_info(int fd, struct boot_info *boot, const char *tag)
 int check_booting_rescue(void)
 {
 	FILE *fp;
-	char cmdline[256];
+	char cmdline[CMD_LEN];
 	int rescue = 0;
 
 	fp = fopen(CMDLINE, "r");
@@ -355,6 +332,39 @@ void show_boot_info(struct boot_info *boot)
 	printf("------------------------------------\n");
 }
 
+const struct target_info *check_target()
+{
+	const struct target_info *target = &targets[0];
+	char compatible[CMD_LEN] = {0, };
+	FILE *fp;
+	int ret;
+
+	fp = fopen(COMPATIBLE, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Error: Cannot open %s\n", COMPATIBLE);
+		return NULL;
+	}
+
+	ret = fscanf(fp, "%255s", compatible);
+	if (ret < 0) {
+		fprintf(stderr, "Error: Cannot read %s\n", COMPATIBLE);
+		fclose(fp);
+		return NULL;
+	}
+
+	while (target != NULL) {
+		if (strstr(compatible, target->name) != NULL) {
+			printf("TARGET : %s\n", target->name);
+			fclose(fp);
+			return target;
+		}
+		target++;
+	}
+	fclose(fp);
+
+	return NULL;
+}
+
 void print_usage(void)
 {
 	printf("Usage:\n");
@@ -383,6 +393,7 @@ int main(int argc, char *argv[])
 	const char *tag = NULL;
 	int fd, ret, opt;
 	struct boot_info current_boot;
+	const struct target_info *target;
 	struct option opts[] = {
 		{"info", no_argument, 0, 'i'},
 		{"set", no_argument, 0, 's'},
@@ -455,6 +466,12 @@ int main(int argc, char *argv[])
 		return -EINVAL;
 	}
 
+	target = check_target();
+	if (target == NULL) {
+		printf("Unsupported target\n");
+		return -1;
+	}
+
 	signal(SIGINT, SIG_IGN);
 
 	/* Read FLAG partition */
@@ -477,15 +494,15 @@ int main(int argc, char *argv[])
 	bootpart = check_booting_part();
 	if (bootpart == PART0) {
 		snprintf(boot_path, PATH_LEN, "%s%s",
-				bootdev_path, BOOT1_PART);
+				bootdev_path, target->boot1_p);
 		snprintf(modules_path, PATH_LEN, "%s%s",
-				bootdev_path, MODULES1_PART);
+				bootdev_path, target->modules1_p);
 		current_boot.part_num = PART1;
 	} else if (bootpart == PART1) {
 		snprintf(boot_path, PATH_LEN, "%s%s",
-				bootdev_path, BOOT0_PART);
+				bootdev_path, target->boot0_p);
 		snprintf(modules_path, PATH_LEN, "%s%s",
-				bootdev_path, MODULES0_PART);
+				bootdev_path, target->modules0_p);
 		current_boot.part_num = PART0;
 	} else {
 		printf("Cannot find bootpart\n");
