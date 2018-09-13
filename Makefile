@@ -1,10 +1,15 @@
-CFLAGS=-Wall
-SRC=artik_updater
-TARGET=artik-updater
+CFLAGS = -Wall -O2
+TARGET = artik-updater
 
-all : $(TARGET)
-$(TARGET) : $(SRC)/$(TARGET).c
+OBJS_V1 = \
+	src/artik-ota-v1/artik-updater.o
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS_V1)
 	$(CC) $(CFLAGS) -o $@ $^
 
-clean :
-	$(RM) $(TARGET)
+clean:
+	$(RM) $(TARGET) $(OBJS_V1)
+
+.PHONY: all v1 clean
