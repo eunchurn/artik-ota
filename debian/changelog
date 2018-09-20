@@ -1,3 +1,9 @@
+artik-ota (1.0.7) artik; urgency=medium
+
+  * artik-updater: add sync after write
+
+ -- Jaewon Kim <jaewon02.kim@samsung.com>  Thu, 20 Sep 2018 13:00:33 +0900
+
 artik-ota (1.0.6) artik; urgency=medium
 
   * artik-updater: support artik310s model

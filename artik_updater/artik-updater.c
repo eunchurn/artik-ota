@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include "artik-updater.h"
 
-#define VERSION		"v1.0.6"
+#define VERSION		"v1.0.7"
 
 static const struct target_info targets[] = {
 	{ .name = "artik710", .boot0_p = "2", .boot1_p = "3", .modules0_p = "5",
@@ -148,6 +148,8 @@ int write_boot_info(int fd, struct boot_info *info)
 		return ret;
 	}
 
+	fsync(fd);
+
 	return 0;
 }
 
@@ -185,6 +187,7 @@ int write_image(const char *file_path, char *part)
 	}
 
 	fclose(in);
+	fflush(out);
 	fclose(out);
 	free(buf);
 
@@ -215,6 +218,8 @@ int update_boot_info(int fd, struct boot_info *boot, const char *tag)
 	ret = write_boot_info(fd, boot);
 	if (ret < 0)
 		return ret;
+
+	fsync(fd);
 
 	return 0;
 }
@@ -417,7 +422,6 @@ int main(int argc, char *argv[])
 			if (fd < 0)
 				return fd;
 			show_boot_info(&current_boot);
-			fsync(fd);
 			close(fd);
 			return 0;
 		case 's':
@@ -531,7 +535,6 @@ int main(int argc, char *argv[])
 		return ret;
 	}
 
-	fsync(fd);
 	close(fd);
 
 	return 0;

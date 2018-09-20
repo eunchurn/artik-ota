@@ -1,6 +1,6 @@
 Name:		artik-ota
 Summary:	OTA for ARTIK
-Version:	1.0.6
+Version:	1.0.7
 Release:	1
 Group:		System
 License:	Apache-2.0
